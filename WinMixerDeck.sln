@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinMixerDeck", "WinMixerDeck\WinMixerDeck.csproj", "{0CF991A0-92B5-4761-A12D-A018AA850FF5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamDeckCS", "..\StreamDeckCS\StreamDeckCS\StreamDeckCS.csproj", "{767F54C1-6A9E-4DA1-A53E-1809AB93F0C7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinMixerCoreConsoleV2", "..\WinMixerCore\WinMixerCoreConsoleV2\WinMixerCoreConsoleV2.csproj", "{1270AE81-9EA5-45A3-A20B-4D0033B2C85B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0CF991A0-92B5-4761-A12D-A018AA850FF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CF991A0-92B5-4761-A12D-A018AA850FF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CF991A0-92B5-4761-A12D-A018AA850FF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CF991A0-92B5-4761-A12D-A018AA850FF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{767F54C1-6A9E-4DA1-A53E-1809AB93F0C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{767F54C1-6A9E-4DA1-A53E-1809AB93F0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{767F54C1-6A9E-4DA1-A53E-1809AB93F0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{767F54C1-6A9E-4DA1-A53E-1809AB93F0C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1270AE81-9EA5-45A3-A20B-4D0033B2C85B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1270AE81-9EA5-45A3-A20B-4D0033B2C85B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1270AE81-9EA5-45A3-A20B-4D0033B2C85B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1270AE81-9EA5-45A3-A20B-4D0033B2C85B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {77E5FCAF-CFEF-4B7B-B1BE-9EE18B041E2E}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,31 @@
+﻿<head>
+    <meta charset="utf-8" />
+    <title>My Property Inspector</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-item" id="select_single">
+            <div class="sdpi-item-label">Select</div>
+            <select class="sdpi-item-value select" id="myselect" onchange="setSettings()">
+            </select>
+        </div>
+
+        <div type="radio" class="sdpi-item" id="adjust_radio">
+            <div class="sdpi-item-label">Volume Setting</div>
+            <div class="sdpi-item-value">
+                <span class="sdpi-item-child">
+                    <input id="volUpRadio" type="radio" name="volRadio" checked onchange="setSettings()">
+                    <label for="volUpRadio" class="sdpi-item-label"><span></span>Volume Up</label>
+                </span>
+                <span class="sdpi-item-child">
+                    <input id="volDownRadio" type="radio" name="volRadio" onchange="setSettings()">
+                    <label for="volDownRadio" class="sdpi-item-label"><span></span>Volume Down</label>
+                </span>
+            </div>
+        </div>
+
+    </div>
+    <script type="text/javascript" src="scripts/appChooserScript.js"></script>
+</body>

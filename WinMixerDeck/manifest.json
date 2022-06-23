@@ -1,0 +1,69 @@
+﻿{
+  "Actions": [
+    {
+      "Icon": "assets/soundMixer",
+      "Name": "Volume Interval",
+      "States": [
+        {
+          "Image": "assets/soundMixer",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Changes the interval to alter volume by.",
+      "UUID": "com.mbranvall.winmixerdeck.volumeinterval",
+      "PropertyInspectorPath": "PropertyInspector/VolumeInterval.html"
+    },
+    {
+      "Icon": "assets/soundMixer",
+      "Name": "Application Picker",
+      "States": [
+        {
+          "Image": "assets/soundMixer",
+          "Title": "",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Selects an application",
+      "UUID": "com.mbranvall.winmixerdeck.applicationpicker",
+      "PropertyInspectorPath": "PropertyInspector/AppPicker.html"
+    },
+    {
+      "Icon": "assets/soundMixer",
+      "Name": "Volume Controller",
+      "States": [
+        {
+          "Image": "assets/soundMixer",
+          "Title": "",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Selects an application",
+      "UUID": "com.mbranvall.winmixerdeck.applicationpicker",
+      "PropertyInspectorPath": "PropertyInspector/AppChooser.html"
+    }
+  ],
+  "SDKVersion": 2,
+  "Author": "Max Branvall",
+  "CodePath": "WinMixerDeck.exe",
+  "Description": "Plugin to control volume of running applications on Windows.",
+  "Category": "Branflake",
+  "Name": "WinMixerDeck",
+  "Icon": "assets/soundMixer",
+  "URL": "https://github.com/MaxBranvall/WinMixerDeck",
+  "Version": "1.2",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "4.1"
+  }
+}

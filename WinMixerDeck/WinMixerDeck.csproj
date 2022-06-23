@@ -1,0 +1,115 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <BaseOutputPath>com.mbranvall.winmixerdeck.sdPlugin</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\mixer%402x.png" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\mixer.png" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\test%402x.png" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\test.png" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\manifest.json" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\AppChooser.html" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\check.png" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\sdpi.css" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.deps.json" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.runtimeconfig.dev.json" />
+    <Content Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.runtimeconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="assets\mixer%402x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\mixer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\soundMixer%402x.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\soundMixer.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\test%402x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\test.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\caret.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\check.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\check.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\elg_calendar.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\elg_calendar_inv.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\rcheck.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\css\sdpi.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\AppChooser.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\scripts\script.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\scripts\volumeIntervalScript.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PropertyInspector\VolumeInterval.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="com.mbranvall.winmixerdeck.sdPlugin\Debug\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\Newtonsoft.Json.dll" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\caret.svg" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\check.svg" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\elg_calendar.svg" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\elg_calendar_inv.svg" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\PropertyInspector\css\rcheck.svg" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\StreamDeckCS.dll" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\StreamDeckCS.pdb" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\WebSocketEnhanced.dll" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\WebSocketEnhanced.pdb" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.dll" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.exe" />
+    <None Include="com.mbranvall.winmixerdeck.sdPlugin\WinMixerDeck.pdb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\StreamDeckCS\StreamDeckCS\StreamDeckCS.csproj" />
+    <ProjectReference Include="..\..\WinMixerCore\WinMixerCoreConsoleV2\WinMixerCoreConsoleV2.csproj" />
+  </ItemGroup>
+
+</Project>
