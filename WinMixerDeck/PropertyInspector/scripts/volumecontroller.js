@@ -43,29 +43,17 @@ function processMessage(msg) {
     let event = msg['event']
     let messageType = msg['payload']['messageType']
 
+    uuid = msg['context'];  
+
     // get message from plugin
     if (event == Constants.SEND_TO_PI) {
 
         // store UUID of plugin, for use with custom settings
-        uuid = msg['context'];
-
-        // if plugin sent available audio sessions
-        if (messageType == "getSessions") {
-
-            // add option to select box for each audio session
-            for (var i = 0; i < msg['payload']['audioSessions'].length; i++) {
-                var option = document.createElement("option");
-                option.value = msg['payload']['audioSessions'][i];
-                option.innerHTML = msg['payload']['audioSessions'][i];
-
-                document.getElementById("myselect").appendChild(option);
-            }
-        }
+        uuid = msg['context'];        
         
         getSettings();
 
     } else if (event == Constants.DID_RECEIVE_SETTINGS) {
-        console.log("got settings")
         applySettings(msg['payload']);
     }
 }
@@ -88,14 +76,12 @@ function sendToPlugin(value, param) {
 
 function setSettings() {
 
-    appName = document.getElementById("myselect").value;
     keyFunction = (document.getElementById('volUpRadio').checked) ? 'volUp' : 'volDown';
 
     const o = baseObj;
     o.event = Constants.SET_SETTINGS;
     o.context = PIuuid;
     o.payload[uuid] = {
-        'appName': appName,
         'keyFunction': keyFunction
     }
 
@@ -117,14 +103,9 @@ function getSettings() {
 
 function applySettings(payload) {
 
-    console.log(payload)
-
     console.log("applying settings");
 
-    appName = payload['settings'][uuid]['appName']
     keyFunction = payload['settings'][uuid]['keyFunction']
-
-    document.getElementById("myselect").value = appName;
     var c = (keyFunction == 'volUp') ? document.getElementById("volUpRadio").checked = true : document.getElementById("volDownRadio").checked = true;
 }
 

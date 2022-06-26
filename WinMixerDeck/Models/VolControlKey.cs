@@ -9,7 +9,8 @@ using StreamDeckCS.EventsReceived;
 
 namespace WinMixerDeck.Models
 {
-    public class PluginKey : KeyWrapper
+    public class VolControlKey : KeyWrapper
     {
+        public override string appName { get => null; set => base.appName = null; }
     }
 }

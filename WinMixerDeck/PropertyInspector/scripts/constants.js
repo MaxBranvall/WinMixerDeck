@@ -7,5 +7,3 @@ let Constants = {
     SET_SETTINGS: "setSettings",
     GET_SETTINGS: "getSettings"
 }
-
-export { Constants }

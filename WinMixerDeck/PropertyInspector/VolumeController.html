@@ -10,7 +10,7 @@
             <div class="sdpi-item-label">Select</div>
             <select class="sdpi-item-value select" id="myselect" onchange="setSettings()">
             </select>
-        </div>
+        </div> -->
 
         <div type="radio" class="sdpi-item" id="adjust_radio">
             <div class="sdpi-item-label">Volume Setting</div>
@@ -26,6 +26,15 @@
             </div>
         </div>
 
+        <details class="sdpi-item message info">
+            <summary id="associatedApp">Associated Application: </summary>
+        </details>
+
+        <div class="sdpi-item">
+            <button class="sdpi-item-value" id="calibrateButton">Calibrate</button>
+        </div>
+
     </div>
-    <script type="text/javascript" src="scripts/appChooserScript.js"></script>
+    <script src="scripts/constants.js"></script>
+    <script src="scripts/volumecontroller.js"></script>
 </body>

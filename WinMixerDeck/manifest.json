@@ -32,7 +32,7 @@
       "PropertyInspectorPath": "PropertyInspector/AppPicker.html"
     },
     {
-      "Icon": "assets/soundMixer",
+      "Icon": "assets/volumecontrol",
       "Name": "Volume Controller",
       "States": [
         {
@@ -44,8 +44,8 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Selects an application",
-      "UUID": "com.mbranvall.winmixerdeck.applicationpicker",
-      "PropertyInspectorPath": "PropertyInspector/AppChooser.html"
+      "UUID": "com.mbranvall.winmixerdeck.volumecontroller",
+      "PropertyInspectorPath": "PropertyInspector/VolumeController.html"
     }
   ],
   "SDKVersion": 2,
