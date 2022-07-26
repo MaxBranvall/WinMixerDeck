@@ -117,8 +117,6 @@ function getSettings() {
 
 function applySettings(payload) {
 
-    console.log(payload)
-
     console.log("applying settings");
 
     appName = payload['settings'][uuid]['appName']

@@ -5,6 +5,7 @@ var uuid = null;
 var actionInfo = {}
 var keyFunction = null;
 var appName = null;
+var coords = null;
 
 // when willAppear fires, plugin will send coords to PI. PI will setSettings with coords of each key and what app they control as well as vol up or down
 // Now when key is pressed, plugin can check coords against keys in settings and perform necessary action
@@ -14,10 +15,11 @@ var appName = null;
 
 function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
 
-    console.log("connecting");
+    console.log("connecting...");
 
     PIuuid = inPropertyInspectorUUID;
     actionInfo = JSON.parse(inActionInfo);
+    coords = actionInfo['payload']['coordinates']
     websocket = new WebSocket('ws://localhost:' + inPort);
     
     websocket.onopen = function () {
@@ -27,10 +29,12 @@ function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegist
         };
        
         websocket.send(JSON.stringify(json));
+
+        console.log("connected at port: " + inPort);
+        getSettings();
     };
 
     websocket.onmessage = function (evt) {
-
         var msg = JSON.parse(evt['data']); 
         processMessage(msg);
 
@@ -43,14 +47,22 @@ function processMessage(msg) {
     let event = msg['event']
     let messageType = msg['payload']['messageType']
 
+    // store UUID of plugin, for use with custom settings
     uuid = msg['context'];  
+
+    console.log(msg);
 
     // get message from plugin
     if (event == Constants.SEND_TO_PI) {
 
-        // store UUID of plugin, for use with custom settings
-        uuid = msg['context'];        
-        
+        if (messageType == "associatedApplication") {
+            appName = msg['payload']['appName'];
+            console.log(appName);
+            document.getElementById("associatedApp").innerText = appName;
+
+            setSettings();
+        }
+
         getSettings();
 
     } else if (event == Constants.DID_RECEIVE_SETTINGS) {
@@ -58,7 +70,7 @@ function processMessage(msg) {
     }
 }
 
-function sendToPlugin(value, param) {
+function sendToPlugin(payload) {
 
     if (websocket) {
         const json = {
@@ -66,12 +78,30 @@ function sendToPlugin(value, param) {
             "event": "sendToPlugin",
             "context": PIuuid,
             "payload": {
-                [param] : value
+                payload
             }
         };
 
+        console.log(JSON.stringify(json));
+
         websocket.send(JSON.stringify(json));
     }
+}
+
+function getAssociatedApp() {
+
+    // send coordinates and volume function
+    // recieve application to associate with or null
+
+    const payload = {
+        "coordinates": {
+            "row": coords.row,
+            "column": coords.column
+        },
+        "keyFunction": keyFunction
+    }
+
+    sendToPlugin(payload)
 }
 
 function setSettings() {
@@ -82,17 +112,19 @@ function setSettings() {
     o.event = Constants.SET_SETTINGS;
     o.context = PIuuid;
     o.payload[uuid] = {
-        'keyFunction': keyFunction
+        'keyFunction': keyFunction,
+        'appName': appName
     }
 
     console.log(o);
 
     websocket.send(JSON.stringify(o));
-
-    getSettings();
 }
 
 function getSettings() {
+
+    console.log("got settings");
+
     let e = {
         'event': Constants.GET_SETTINGS,
         "context": PIuuid
@@ -105,12 +137,40 @@ function applySettings(payload) {
 
     console.log("applying settings");
 
-    keyFunction = payload['settings'][uuid]['keyFunction']
+    console.log(payload);
+
+    // if UUID is undefined, so first time new key is initialized, default it to volUp and setSettings
+    // TODO: when volume key is placed, automatically check if it is below or above an application key.
+    // Then the key will intelligently map itself to the proper function based on placement. We can also
+    // automatically map the associated application to the volume key.
+    try {
+        keyFunction = payload['settings'][uuid]['keyFunction']
+        appName = payload['settings'][uuid]['appName']
+
+        if (appName == null) {
+            appName = "No app selected... Please calibrate"
+        }
+
+    } catch(err) {
+        keyFunction = "volUp";
+        appName = "No app selected... Please calibrate"
+    }
+
+    document.getElementById("associatedApp").innerText = appName;
     var c = (keyFunction == 'volUp') ? document.getElementById("volUpRadio").checked = true : document.getElementById("volDownRadio").checked = true;
+}
+
+function calibrate() {
+    getAssociatedApp();
 }
 
 const baseObj = {
     "event": "",
     "context": "",
     "payload": {}
+}
+
+const coordinates = {
+    "row": "",
+    "column": ""
 }

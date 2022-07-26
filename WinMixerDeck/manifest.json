@@ -36,7 +36,7 @@
       "Name": "Volume Controller",
       "States": [
         {
-          "Image": "assets/soundMixer",
+          "Image": "assets/volumecontrol",
           "Title": "",
           "TitleAlignment": "middle",
           "FontSize": "16"
