@@ -25,6 +25,8 @@ namespace WinMixerDeck
         float interval = 0.05f;
         Dictionary<string, KeyWrapper> keys = new Dictionary<string, KeyWrapper>();
 
+        enum KEY_FUNCTION { VOL_UP, VOL_DOWN };
+
         public WinMixerDeck(string[] args)
         {
             core = new StreamdeckCore(args);
@@ -57,6 +59,8 @@ namespace WinMixerDeck
         {
             core.LogMessage("Got settings. Action: " + e.action);
 
+            string contextRef;
+
             context = e.context;
 
             try
@@ -80,6 +84,16 @@ namespace WinMixerDeck
                         else
                         {
                             keys.Add(context, keySettings);
+                        }
+
+                        if (this._hasVolumeKey(KEY_FUNCTION.VOL_UP, keySettings.coordinates, out contextRef))
+                        {
+                            this._updateVolumeKey(contextRef, keySettings.appName);
+                        }
+
+                        if (this._hasVolumeKey(KEY_FUNCTION.VOL_DOWN, keySettings.coordinates, out contextRef))
+                        {
+                            this._updateVolumeKey(contextRef, keySettings.appName);
                         }
 
                         core.setTitle(keys[context].appName, context);
@@ -116,6 +130,41 @@ namespace WinMixerDeck
                 core.LogMessage("Caught error:  " + ex);
             }
 
+        }
+
+        private bool _hasVolumeKey(KEY_FUNCTION keyFunction, Coordinates coordinates, out string context)
+        {
+
+            // if a volume key is above application key
+            if (keyFunction == KEY_FUNCTION.VOL_UP)
+            {
+
+                context = keys.FirstOrDefault(key => key.Value.coordinates.row == coordinates.row - 1).Key;
+
+            } else {
+
+                context = keys.FirstOrDefault(key => key.Value.coordinates.row == coordinates.row + 1).Key;
+
+            }
+
+            if (context == "0")
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private bool _updateVolumeKey(string context, string newAppName)
+        {
+            keys[context].appName = newAppName;
+
+            core.LogMessage("Updated key with context: " + context + " With: " + newAppName);
+
+            // now set the settings
+
+            return true;
         }
 
         private void Core_SendToPluginEvent(object sender, SendToPlugin e)
