@@ -71,10 +71,21 @@ namespace WinMixerDeck
                 {
                     case "com.mbranvall.winmixerdeck.applicationpicker":
 
-                        PluginKey keySettings = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
-                        core.LogMessage(JsonConvert.SerializeObject(e));
+                        PluginKey keySettings = null;
 
-                        core.LogMessage("App name in settings: " + keySettings.appName);
+
+                        // will throw exception when new key is added
+                        try
+                        {
+                            keySettings = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
+
+                        } catch (Exception ex)
+                        {
+                            keySettings = new PluginKey();
+                            keySettings.appName = "No app";
+                            keySettings.coordinates = e.payload2.coordinates;
+                        }
+
                         keySettings.coordinates = e.payload2.coordinates;
 
                         if (keys.ContainsKey(context))
@@ -86,23 +97,43 @@ namespace WinMixerDeck
                             keys.Add(context, keySettings);
                         }
 
-                        if (this._hasVolumeKey(KEY_FUNCTION.VOL_UP, keySettings.coordinates, out contextRef))
+                        try 
                         {
-                            this._updateVolumeKey(contextRef, keySettings.appName);
+                            core.LogMessage("Searching for volume up key..");
+                            if (this._hasVolumeKey(KEY_FUNCTION.VOL_UP, keySettings.coordinates, out contextRef))
+                            {
+                                this._updateVolumeKey(contextRef, keySettings.appName);
+                            }
+
+                            core.LogMessage("Searching for volume down key..");
+                            if (this._hasVolumeKey(KEY_FUNCTION.VOL_DOWN, keySettings.coordinates, out contextRef))
+                            {
+                                this._updateVolumeKey(contextRef, keySettings.appName);
+                            }
+
+                        } catch(Exception ex)
+                        {
+                            core.LogMessage("Volume key not found: " + ex);
                         }
 
-                        if (this._hasVolumeKey(KEY_FUNCTION.VOL_DOWN, keySettings.coordinates, out contextRef))
-                        {
-                            this._updateVolumeKey(contextRef, keySettings.appName);
-                        }
-
+                        core.LogMessage("Setting title: " + keys[context].appName);
                         core.setTitle(keys[context].appName, context);
                         break;
 
                     case "com.mbranvall.winmixerdeck.volumecontroller":
 
-                        PluginKey keySettings2 = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
-                        core.LogMessage(JsonConvert.SerializeObject(e));
+                        PluginKey keySettings2 = null;
+                        
+                        try
+                        {
+                            keySettings2 = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
+                        } catch (Exception ex)
+                        {
+                            keySettings2 = new PluginKey();
+                            keySettings2.keyFunction = "volUp";
+                            keySettings2.coordinates = e.payload2.coordinates;
+                        }                        
+
                         keySettings2.coordinates = e.payload2.coordinates;
 
                         if (keys.ContainsKey(context))
@@ -135,24 +166,33 @@ namespace WinMixerDeck
         private bool _hasVolumeKey(KEY_FUNCTION keyFunction, Coordinates coordinates, out string context)
         {
 
+            KeyValuePair<string, KeyWrapper> tmp;
+
             // if a volume key is above application key
             if (keyFunction == KEY_FUNCTION.VOL_UP)
             {
 
-                context = keys.FirstOrDefault(key => key.Value.coordinates.row == coordinates.row - 1).Key;
+                tmp = keys.FirstOrDefault(key => (key.Value.coordinates.column == coordinates.column && key.Value.coordinates.row == coordinates.row - 1));
 
             } else {
 
-                context = keys.FirstOrDefault(key => key.Value.coordinates.row == coordinates.row + 1).Key;
+                tmp = keys.FirstOrDefault(key => (key.Value.coordinates.column == coordinates.column && key.Value.coordinates.row == coordinates.row + 1));
 
             }
 
-            if (context == "0")
+            try
             {
-                return false;
+                context = tmp.Key;
+                return true;
+
+            } catch(Exception ex)
+            {
+                core.LogMessage("No valid volume key");
             }
 
-            return true;
+            context = null;
+
+            return false;
 
         }
 
@@ -162,7 +202,10 @@ namespace WinMixerDeck
 
             core.LogMessage("Updated key with context: " + context + " With: " + newAppName);
 
+            var x = new { context = new { AppName = newAppName, keyFunction = keys[context].keyFunction } };
+
             // now set the settings
+            core.setSettings(context, JObject.FromObject(x).ToString());
 
             return true;
         }
@@ -215,7 +258,7 @@ namespace WinMixerDeck
 
         private void Core_WillAppearEvent(object sender, WillAppear e)
         {
-            core.LogMessage("Context appeared: " + e.context);
+            core.LogMessage("Context appeared: " + e.context + e.action);
 
             core.getSettings(e.context);
 
@@ -224,7 +267,6 @@ namespace WinMixerDeck
                 case "com.mbranvall.winmixerdeck.applicationpicker":
                     try
                     {
-                        //core.setTitle(keys[e.context].appName, e.context);
                     }
                     catch
                     {
@@ -232,6 +274,9 @@ namespace WinMixerDeck
                     }
                     break;
 
+                case "com.mbranvall.winmixerdeck.volumecontroller":
+                    core.LogMessage("volume controller appeared");
+                    break;
                 default:
                     break;
 
@@ -245,6 +290,7 @@ namespace WinMixerDeck
         {
 
             core.LogMessage("PI Appeared. Action: " + e.action);
+            //core.getSettings(e.context);
             //List<string> names = new List<string>();
             //var sessions = new AudioSessionManager();
             //List<AudioSession> x = sessions.getAudioSessions();
@@ -264,12 +310,14 @@ namespace WinMixerDeck
 
                     x.ForEach(session => names.Add(session.Name));
                     core.sendToPI(JObject.FromObject(new Payload(names)), e.context);
+                    core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
 
                     break;
 
                 case "com.mbranvall.winmixerdeck.volumecontroller":
 
                     core.LogMessage(e.context);
+                    core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
                     //var y = new { appName = keys[e.context].appName };
                     //core.sendToPI(JObject.FromObject(y), e.context);
 
@@ -339,30 +387,6 @@ namespace WinMixerDeck
                     }
                 }
             }
-
-            //var sessions = new WinMixerCoreConsoleV2.AudioSessionManager();
-            //List<AudioSession> x = sessions.getAudioSessions();
-
-            //List<string> names = new List<string>();
-
-            //foreach (var session in x)
-            //{
-            //    names.Add(session.Name);
-            //}
-
-            //core.sendToPI(new Payload(names), e.context);
-
-            //var sessions = new WinMixerCoreConsoleV2.AudioSessionManager();
-
-            //List<AudioSession> x = sessions.getAudioSessions();
-
-            //var msg = x[i++].Name;
-
-            //core.setTitle(msg, e.context);
-
-            //core.LogMessage($"set title to: {msg}! Process name");
-            //pressed = !pressed;
-            //myTimer.Stop();
 
         }
 

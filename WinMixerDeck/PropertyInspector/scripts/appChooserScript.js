@@ -49,6 +49,11 @@ function processMessage(msg) {
         // store UUID of plugin, for use with custom settings
         uuid = msg['context'];
 
+        if (messageType == "handshake") {
+            uuid = msg['context'];
+            getSettings();
+        }
+
         // if plugin sent available audio sessions
         if (messageType == "getSessions") {
 
@@ -59,10 +64,8 @@ function processMessage(msg) {
                 option.innerHTML = msg['payload']['audioSessions'][i];
 
                 document.getElementById("myselect").appendChild(option);
-            }
+            }        
         }
-        
-        getSettings();
 
     } else if (event == Constants.DID_RECEIVE_SETTINGS) {
         console.log("got settings")
@@ -99,11 +102,7 @@ function setSettings() {
         'keyFunction': keyFunction
     }
 
-    console.log(o);
-
     websocket.send(JSON.stringify(o));
-
-    getSettings();
 }
 
 function getSettings() {

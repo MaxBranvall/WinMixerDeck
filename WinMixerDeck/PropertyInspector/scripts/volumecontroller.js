@@ -3,7 +3,7 @@ var websocket = null;
 var PIuuid = null;
 var uuid = null;
 var actionInfo = {}
-var keyFunction = null;
+var keyFunction = "volUp";
 var appName = null;
 var coords = null;
 
@@ -29,14 +29,11 @@ function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegist
         };
        
         websocket.send(JSON.stringify(json));
-
         console.log("connected at port: " + inPort);
-        getSettings();
     };
 
-    websocket.onmessage = function (evt) {
-        var msg = JSON.parse(evt['data']); 
-        processMessage(msg);
+    websocket.onmessage = function (evt) {                
+        processMessage(JSON.parse(evt['data']));
 
     }
 
@@ -55,15 +52,20 @@ function processMessage(msg) {
     // get message from plugin
     if (event == Constants.SEND_TO_PI) {
 
+        if (messageType == "handshake") {
+            uuid = msg['context'];
+            getSettings();
+        }
+
         if (messageType == "associatedApplication") {
             appName = msg['payload']['appName'];
             console.log(appName);
             document.getElementById("associatedApp").innerText = appName;
 
             setSettings();
+        } else if (messageType == "keyNotFound") {
+            // setSettings();
         }
-
-        getSettings();
 
     } else if (event == Constants.DID_RECEIVE_SETTINGS) {
         applySettings(msg['payload']);
@@ -82,8 +84,6 @@ function sendToPlugin(payload) {
             }
         };
 
-        console.log(JSON.stringify(json));
-
         websocket.send(JSON.stringify(json));
     }
 }
@@ -91,7 +91,7 @@ function sendToPlugin(payload) {
 function getAssociatedApp() {
 
     // send coordinates and volume function
-    // recieve application to associate with or null
+    // receive application to associate with or null
 
     const payload = {
         "coordinates": {
@@ -116,8 +116,6 @@ function setSettings() {
         'appName': appName
     }
 
-    console.log(o);
-
     websocket.send(JSON.stringify(o));
 }
 
@@ -136,8 +134,6 @@ function getSettings() {
 function applySettings(payload) {
 
     console.log("applying settings");
-
-    console.log(payload);
 
     // if UUID is undefined, so first time new key is initialized, default it to volUp and setSettings
     // TODO: when volume key is placed, automatically check if it is below or above an application key.
