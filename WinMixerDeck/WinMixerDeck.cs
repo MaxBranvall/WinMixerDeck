@@ -9,6 +9,7 @@ using System.Timers;
 using WinMixerCoreConsoleV2;
 using WinMixerCoreConsoleV2.models;
 using WinMixerDeck.Models;
+using WinMixerDeck.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,6 +22,7 @@ namespace WinMixerDeck
         bool pressed = false;
         Timer myTimer;
         string context;
+        KeyDown keyHeldDown;
         int i = 0;
         float interval = 0.05f;
         Dictionary<string, KeyWrapper> keys = new Dictionary<string, KeyWrapper>();
@@ -205,7 +207,7 @@ namespace WinMixerDeck
             var x = new { context = new { AppName = newAppName, keyFunction = keys[context].keyFunction } };
 
             // now set the settings
-            core.setSettings(context, JObject.FromObject(x).ToString());
+            core.setSettings(context, JObject.FromObject(x));
 
             return true;
         }
@@ -290,13 +292,6 @@ namespace WinMixerDeck
         {
 
             core.LogMessage("PI Appeared. Action: " + e.action);
-            //core.getSettings(e.context);
-            //List<string> names = new List<string>();
-            //var sessions = new AudioSessionManager();
-            //List<AudioSession> x = sessions.getAudioSessions();
-
-            //x.ForEach(session => names.Add(session.Name));
-            //core.sendToPI(new Payload(names), e.context);
 
             switch (e.action)
             {
@@ -304,11 +299,8 @@ namespace WinMixerDeck
 
                     // send audio session names to applicationpicker action
 
-                    List<string> names = new List<string>();
-                    var sessions = new AudioSessionManager();
-                    List<AudioSession> x = sessions.getAudioSessions();
+                    var names = getAudioSessions();
 
-                    x.ForEach(session => names.Add(session.Name));
                     core.sendToPI(JObject.FromObject(new Payload(names)), e.context);
                     core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
 
@@ -318,8 +310,6 @@ namespace WinMixerDeck
 
                     core.LogMessage(e.context);
                     core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
-                    //var y = new { appName = keys[e.context].appName };
-                    //core.sendToPI(JObject.FromObject(y), e.context);
 
                     break;
 
@@ -333,18 +323,52 @@ namespace WinMixerDeck
 
 
 
+        }   
+        
+        private List<string> getAudioSessions()
+        {
+            List<string> names = new List<string>();
+            var sessions = new AudioSessionManager();
+            List<AudioSession> x = sessions.getAudioSessions();
+
+            x.ForEach(session => names.Add(session.Name));
+            return names;
         }
 
         private void MyTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            core.setTitle("Hold", context);
-            core.LogMessage("Held button for 2 secs");
             myTimer.Stop();
+
+            string context = keyHeldDown.context;
+            core.LogMessage("Held button with context: " + context);
+
+            if (keyHeldDown.action == "com.mbranvall.winmixerdeck.applicationpicker")
+            {
+
+                var audioSessions = getAudioSessions();
+
+                var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)]};
+
+                core.LogMessage("Setting new app name: " + tmp.appName);
+                JObject pload = new JObject();
+                pload.Add(context, JObject.FromObject(tmp));
+
+                core.setSettings(context, pload);
+                core.setTitle(tmp.appName, context);
+                core.getSettings(context);
+
+
+            } else
+            {                
+                return;
+            }
+
         }
 
         private void Core_KeyDownEvent(object sender, KeyDown e)
         {
-            myTimer.Interval = 2000;
+            keyHeldDown = e;
+            myTimer.Interval = 2000;        
             myTimer.Enabled = true;
             myTimer.AutoReset = false;
         }
@@ -354,38 +378,51 @@ namespace WinMixerDeck
 
             myTimer.Stop();
 
-            if (keys.ContainsKey(e.context))
+            switch(e.action)
             {
-                core.LogMessage("found key");
-                var sessions = new AudioSessionManager();
-                List<AudioSession> x = sessions.getAudioSessions();
+                case PluginConsts.APP_CHOOSER:
+                    break;
 
-                foreach (var session in x)
-                {
+                case PluginConsts.VOL_CONTROLLER:
 
-                    if (session.Name == keys[e.context].appName)
+                    if (keys.ContainsKey(e.context))
                     {
-                        try
-                        {
-                            core.LogMessage("adjusting volume");
+                        core.LogMessage("found key");
+                        var sessions = new AudioSessionManager();
+                        List<AudioSession> x = sessions.getAudioSessions();
 
-                            if (keys[e.context].keyFunction == "volUp")
-                            {
-                                sessions.adjustVolume(session, sessions.getVolumeLevel(session) + interval);
-                            }
-                            else
-                            {
-                                sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval);
-                            }
-                        }
-                        catch
+                        foreach (var session in x)
                         {
 
-                        }
+                            if (session.Name == keys[e.context].appName)
+                            {
+                                try
+                                {
+                                    core.LogMessage("adjusting volume");
 
-                        break;
+                                    if (keys[e.context].keyFunction == "volUp")
+                                    {
+                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) + interval);
+                                    }
+                                    else
+                                    {
+                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval);
+                                    }
+                                }
+                                catch
+                                {
+
+                                }
+
+                                break;
+                            }
+                        }
                     }
-                }
+
+                    break;
+
+                default:
+                    break;
             }
 
         }

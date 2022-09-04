@@ -42,7 +42,7 @@ function processMessage(msg) {
 
     let event = msg['event']
     let messageType = msg['payload']['messageType']
-
+    
     // get message from plugin
     if (event == Constants.SEND_TO_PI) {
 
@@ -92,14 +92,12 @@ function sendToPlugin(value, param) {
 function setSettings() {
 
     appName = document.getElementById("myselect").value;
-    keyFunction = (document.getElementById('volUpRadio').checked) ? 'volUp' : 'volDown';
 
     const o = baseObj;
     o.event = Constants.SET_SETTINGS;
     o.context = PIuuid;
     o.payload[uuid] = {
-        'appName': appName,
-        'keyFunction': keyFunction
+        'appName': appName
     }
 
     websocket.send(JSON.stringify(o));
@@ -118,11 +116,14 @@ function applySettings(payload) {
 
     console.log("applying settings");
 
-    appName = payload['settings'][uuid]['appName']
-    keyFunction = payload['settings'][uuid]['keyFunction']
+    try{
+        appName = payload['settings'][uuid]['appName'];  
+    } catch(error) {
+        appName = payload['settings']['appName'];  
+    }
+  
 
-    document.getElementById("myselect").value = appName;
-    var c = (keyFunction == 'volUp') ? document.getElementById("volUpRadio").checked = true : document.getElementById("volDownRadio").checked = true;
+    document.getElementById("myselect").value = appName;    
 }
 
 const baseObj = {
