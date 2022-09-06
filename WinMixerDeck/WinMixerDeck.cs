@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StreamDeckCS;
+using StreamDeckCS.Helpers;
 using StreamDeckCS.EventsReceived;
 using System.Timers;
 using WinMixerCoreConsoleV2;
@@ -31,6 +32,7 @@ namespace WinMixerDeck
 
         public WinMixerDeck(string[] args)
         {
+
             core = new StreamdeckCore(args);
             myTimer = new Timer();
 
@@ -62,6 +64,7 @@ namespace WinMixerDeck
             core.LogMessage("Got settings. Action: " + e.action);
 
             string contextRef;
+            PluginKey keySettings;
 
             context = e.context;
 
@@ -73,22 +76,19 @@ namespace WinMixerDeck
                 {
                     case "com.mbranvall.winmixerdeck.applicationpicker":
 
-                        PluginKey keySettings = null;
-
-
                         // will throw exception when new key is added
                         try
                         {
-                            keySettings = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
+                            keySettings = JsonConvert.DeserializeObject<PluginKey>(e.payload.settings[context].ToString());
 
                         } catch (Exception ex)
                         {
                             keySettings = new PluginKey();
                             keySettings.appName = "No app";
-                            keySettings.coordinates = e.payload2.coordinates;
+                            keySettings.coordinates = e.payload.coordinates;
                         }
 
-                        keySettings.coordinates = e.payload2.coordinates;
+                        keySettings.coordinates = e.payload.coordinates;
 
                         if (keys.ContainsKey(context))
                         {
@@ -119,36 +119,61 @@ namespace WinMixerDeck
                         }
 
                         core.LogMessage("Setting title: " + keys[context].appName);
-                        core.setTitle(keys[context].appName, context);
+                        core.setTitle(context, keys[context].appName);
                         break;
 
                     case "com.mbranvall.winmixerdeck.volumecontroller":
 
-                        PluginKey keySettings2 = null;
-                        
                         try
                         {
-                            keySettings2 = JsonConvert.DeserializeObject<PluginKey>(e.payload2.general[context].ToString());
+                            keySettings = JsonConvert.DeserializeObject<PluginKey>(e.payload.settings[context].ToString());
+                            keySettings.updated = false;
                         } catch (Exception ex)
                         {
-                            keySettings2 = new PluginKey();
-                            keySettings2.keyFunction = "volUp";
-                            keySettings2.coordinates = e.payload2.coordinates;
+                            keySettings = new PluginKey();
+                            keySettings.keyFunction = "volUp";
+                            keySettings.coordinates = e.payload.coordinates;
                         }                        
 
-                        keySettings2.coordinates = e.payload2.coordinates;
+                        keySettings.coordinates = e.payload.coordinates;
 
                         if (keys.ContainsKey(context))
                         {
-                            keys[context] = keySettings2;
+                            keys[context] = keySettings;
                         }
                         else
                         {
-                            keys.Add(context, keySettings2);
+                            keys.Add(context, keySettings);
                         }
 
-                        var img = keySettings2.keyFunction == "volUp" ? "./assets/VOL_+.jpg" : "./assets/VOL_-.jpg";
-                        core.setImage(img, context);
+
+                        try
+                        {
+
+                            string newAppName;
+
+                            if (!keySettings.updated)
+                            {
+                                if (keySettings.keyFunction == "volUp")
+                                {
+                                    newAppName = getAppNameFromAppPicker(keySettings.coordinates.row + 1, keySettings.coordinates.column);
+                                } else
+                                {
+                                    newAppName = getAppNameFromAppPicker(keySettings.coordinates.row - 1, keySettings.coordinates.column);
+                                }
+
+                                this._updateVolumeKey(context, newAppName);
+
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            core.LogMessage("App picker does not exist yet..");
+                        }
+
+                        var img = keySettings.keyFunction == "volUp" ? "./assets/VOL_+.jpg" : "./assets/VOL_-.jpg";
+                        core.setImage(context, img);
 
                         break;
 
@@ -163,6 +188,15 @@ namespace WinMixerDeck
                 core.LogMessage("Caught error:  " + ex);
             }
 
+        }
+
+        private string getAppNameFromAppPicker(int row, int column)
+        {
+            KeyValuePair<string, KeyWrapper> tmp;
+
+            tmp = keys.FirstOrDefault(key => (key.Value.coordinates.row == row && key.Value.coordinates.column == column));
+
+            return keys[tmp.Key].appName;
         }
 
         private bool _hasVolumeKey(KEY_FUNCTION keyFunction, Coordinates coordinates, out string context)
@@ -202,12 +236,14 @@ namespace WinMixerDeck
         {
             keys[context].appName = newAppName;
 
-            core.LogMessage("Updated key with context: " + context + " With: " + newAppName);
+            core.LogMessage("Updated key with context: " + context + " With app: " + newAppName);
 
-            var x = new { context = new { AppName = newAppName, keyFunction = keys[context].keyFunction } };
+            var x = new { AppName = newAppName, keyFunction = keys[context].keyFunction, updated = true };
+            JObject tmp = new JObject();
+            tmp.Add(context, JObject.FromObject(x));
 
             // now set the settings
-            core.setSettings(context, JObject.FromObject(x));
+            core.setSettings(context, tmp);
 
             return true;
         }
@@ -235,7 +271,7 @@ namespace WinMixerDeck
                                 core.LogMessage(key.Value.appName);
                                 var x = new { appName = key.Value.appName, messageType = "associatedApplication" };
                                 core.LogMessage(JsonConvert.SerializeObject(x));
-                                core.sendToPI(JObject.FromObject(x), context);
+                                core.sendToPI(context, "com.mbranvall.winmixerdeck.volumecontroller", JObject.FromObject(x));
                             }
                         }
 
@@ -248,7 +284,7 @@ namespace WinMixerDeck
                             {
                                 core.LogMessage(key.Value.appName);
                                 var x = new { appName = key.Value.appName, messageType = "associatedApplication" };
-                                core.sendToPI(JObject.FromObject(x), context);
+                                core.sendToPI(context, "com.mbranvall.winmixerdeck.volumecontroller", JObject.FromObject(x));
                             }
                         }
                     }
@@ -295,21 +331,21 @@ namespace WinMixerDeck
 
             switch (e.action)
             {
-                case "com.mbranvall.winmixerdeck.applicationpicker":
+                case PluginConsts.APP_CHOOSER:
 
                     // send audio session names to applicationpicker action
 
                     var names = getAudioSessions();
 
-                    core.sendToPI(JObject.FromObject(new Payload(names)), e.context);
-                    core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
+                    core.sendToPI(e.context, PluginConsts.APP_CHOOSER, JObject.FromObject(new Payload(names)));
+                    core.sendToPI(e.context, PluginConsts.APP_CHOOSER, JObject.FromObject(new { messageType = "handshake" }));
 
                     break;
 
-                case "com.mbranvall.winmixerdeck.volumecontroller":
+                case PluginConsts.VOL_CONTROLLER:
 
                     core.LogMessage(e.context);
-                    core.sendToPI(JObject.FromObject(new { messageType = "handshake" }), e.context);
+                    core.sendToPI(e.context, PluginConsts.VOL_CONTROLLER, JObject.FromObject(new { messageType = "handshake" }));
 
                     break;
 

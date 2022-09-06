@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using StreamDeckCS.EventsReceived;
+﻿using Newtonsoft.Json;
+using StreamDeckCS.Helpers;
 
 namespace WinMixerDeck.Models
 {
@@ -17,6 +11,9 @@ namespace WinMixerDeck.Models
 
         [JsonProperty("keyFunction")]
         public string keyFunction { get; set; }
+
+        [JsonProperty("updated")]
+        public bool updated { get; set; }
 
         public Coordinates coordinates = new Coordinates();
     }

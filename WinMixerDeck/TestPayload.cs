@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using StreamDeckCS;
-using StreamDeckCS.EventsReceived;
+using StreamDeckCS.Helpers;
 
 namespace WinMixerDeck
 {
-    public class TestPayload : IPayload
+    public class TestPayload
     {
         public string msg { get; set; }
 

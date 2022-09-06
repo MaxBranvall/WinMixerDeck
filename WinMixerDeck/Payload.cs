@@ -8,7 +8,7 @@ using StreamDeckCS;
 
 namespace WinMixerDeck
 {
-    class Payload : IPayload
+    class Payload
     {
         [JsonProperty("messageType")]
         string messageType = "getSessions";
