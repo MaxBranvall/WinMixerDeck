@@ -25,7 +25,7 @@ namespace WinMixerDeck
         string context;
         KeyDown keyHeldDown;
         int i = 0;
-        float interval = 0.05f;
+        float interval = 0.25f;
         Dictionary<string, KeyWrapper> keys = new Dictionary<string, KeyWrapper>();
 
         enum KEY_FUNCTION { VOL_UP, VOL_DOWN };
@@ -43,8 +43,17 @@ namespace WinMixerDeck
             core.WillDisappearEvent += Core_WillDisappearEvent;
             core.SendToPluginEvent += Core_SendToPluginEvent;
             core.DidReceiveSettingsEvent += Core_DidReceiveSettingsEvent;
+            core.DidReceiveGlobalSettingsEvent += Core_DidReceiveGlobalSettingsEvent;
 
             myTimer.Elapsed += MyTimer_Elapsed;
+
+        }
+
+        private void Core_DidReceiveGlobalSettingsEvent(object sender, DidReceiveGlobalSettings e)
+        {
+            core.LogMessage("Got global settings");
+
+            interval = JsonConvert.DeserializeObject<float>(e.payload.settings["interval"].ToString()) / 100;
 
         }
 
@@ -298,13 +307,12 @@ namespace WinMixerDeck
         {
             core.LogMessage("Context appeared: " + e.context + e.action);
 
-            core.getSettings(e.context);
-
             switch(e.action)
             {
                 case "com.mbranvall.winmixerdeck.applicationpicker":
                     try
                     {
+                        core.getSettings(e.context);
                     }
                     catch
                     {
@@ -314,6 +322,11 @@ namespace WinMixerDeck
 
                 case "com.mbranvall.winmixerdeck.volumecontroller":
                     core.LogMessage("volume controller appeared");
+                    core.getSettings(e.context);
+                    break;
+
+                case PluginConsts.VOL_INTERVAL:
+                    core.getGlobalSettings(core.pluginUUID);
                     break;
                 default:
                     break;
@@ -328,34 +341,34 @@ namespace WinMixerDeck
         {
 
             core.LogMessage("PI Appeared. Action: " + e.action);
+            string action = null;
 
             switch (e.action)
             {
                 case PluginConsts.APP_CHOOSER:
 
+                    action = PluginConsts.APP_CHOOSER;
                     // send audio session names to applicationpicker action
-
                     var names = getAudioSessions();
-
                     core.sendToPI(e.context, PluginConsts.APP_CHOOSER, JObject.FromObject(new Payload(names)));
-                    core.sendToPI(e.context, PluginConsts.APP_CHOOSER, JObject.FromObject(new { messageType = "handshake" }));
 
                     break;
 
                 case PluginConsts.VOL_CONTROLLER:
 
-                    core.LogMessage(e.context);
-                    core.sendToPI(e.context, PluginConsts.VOL_CONTROLLER, JObject.FromObject(new { messageType = "handshake" }));
-
+                    action = PluginConsts.VOL_CONTROLLER;
                     break;
 
-                case "com.mbranvall.winmixerdeck.volumeinterval":
+                case PluginConsts.VOL_INTERVAL:
+                    action = PluginConsts.VOL_INTERVAL;
                     break;
 
                 default:
                     core.LogMessage("Action not recognized");
                     break;
             }
+
+            core.sendToPI(e.context, action, JObject.FromObject(new { messageType = "handshake" }));
 
 
 
@@ -383,7 +396,7 @@ namespace WinMixerDeck
 
                 var audioSessions = getAudioSessions();
 
-                var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)]};
+                var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)] };
 
                 core.LogMessage("Setting new app name: " + tmp.appName);
                 JObject pload = new JObject();
@@ -394,8 +407,12 @@ namespace WinMixerDeck
                 core.getSettings(context);
 
 
+            } else if (keyHeldDown.action == PluginConsts.VOL_INTERVAL) {
+
+                core.sendToPI(keyHeldDown.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "incrementInterval" }));
+
             } else
-            {                
+            {
                 return;
             }
 
@@ -416,6 +433,11 @@ namespace WinMixerDeck
 
             switch(e.action)
             {
+
+                case PluginConsts.VOL_INTERVAL:
+                    core.sendToPI(e.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "incrementInterval" }));
+                    break;
+
                 case PluginConsts.APP_CHOOSER:
                     break;
 

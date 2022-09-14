@@ -49,7 +49,7 @@ function processMessage(msg) {
         // store UUID of plugin, for use with custom settings
         uuid = msg['context'];
 
-        if (messageType == "handshake") {
+        if (messageType == Constants.HANDSHAKE) {
             uuid = msg['context'];
             getSettings();
         }

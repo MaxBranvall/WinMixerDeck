@@ -1,4 +1,5 @@
 let Constants = {
+    HANDSHAKE : "handshake",
     SEND_TO_PI : "sendToPropertyInspector",
     DID_RECEIVE_SETTINGS: "didReceiveSettings",
     DID_RECEIVE_GLOBAL_SETTINGS: "didReceiveGlobalSettings",

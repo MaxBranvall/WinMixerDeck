@@ -12,5 +12,6 @@ namespace WinMixerDeck.Helpers
         public const string VOLUME_DOWN = "volDown";
         public const string APP_CHOOSER = "com.mbranvall.winmixerdeck.applicationpicker";
         public const string VOL_CONTROLLER = "com.mbranvall.winmixerdeck.volumecontroller";
+        public const string VOL_INTERVAL = "com.mbranvall.winmixerdeck.volumeinterval";
     }
 }

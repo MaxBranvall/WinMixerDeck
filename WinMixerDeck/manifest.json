@@ -5,7 +5,7 @@
       "Name": "Volume Interval",
       "States": [
         {
-          "Image": "assets/soundMixer",
+          "Image": "assets/black",
           "TitleAlignment": "middle",
           "FontSize": "16"
         }
@@ -23,7 +23,7 @@
           "Image": "assets/soundMixer",
           "Title": "",
           "TitleAlignment": "middle",
-          "FontSize": "16"
+          "FontSize": "12"
         }
       ],
       "SupportedInMultiActions": false,
