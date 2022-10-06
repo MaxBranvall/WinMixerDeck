@@ -1,10 +1,12 @@
 # WinMixerDeck
 
-Stream Deck plugin which allows users to control the volume of individual applications from their Stream Deck. The backend utilizes my C# Stream Deck API wrapper, [StreamDeckCS](https://github.com/MaxBranvall/StreamDeckCS).
+Stream Deck plugin which allows users to control the volume of individual applications from their Stream Deck. The backend utilizes my C# Stream Deck API wrapper, [StreamDeckCS](https://github.com/MaxBranvall/StreamDeckCS). Plugin data is persistent, so your settings settings will be saved locally.
 
 ## Example
 
+Here I demonstrate adding actions to enable changing the volume of Spotify.
 
+![](assets/demo.gif)
 
 ## Installation
 How to install plugin
