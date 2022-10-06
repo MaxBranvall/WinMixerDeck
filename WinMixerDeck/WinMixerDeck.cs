@@ -27,6 +27,8 @@ namespace WinMixerDeck
         int i = 0;
         float interval = 0.25f;
         Dictionary<string, KeyWrapper> keys = new Dictionary<string, KeyWrapper>();
+        List<WillAppear> willAppears = new List<WillAppear>();
+        List<float> intervals = new List<float> { 0.0f, 1.0f, 2.0f, 5.0f, 10.0f, 25.0f };
 
         enum KEY_FUNCTION { VOL_UP, VOL_DOWN };
 
@@ -54,6 +56,11 @@ namespace WinMixerDeck
             core.LogMessage("Got global settings");
 
             interval = JsonConvert.DeserializeObject<float>(e.payload.settings["interval"].ToString()) / 100;
+
+            foreach (var k in willAppears)
+            {
+                core.setTitle(k.context, "Vol Int:\n" + (int)(interval * 100));
+            }
 
         }
 
@@ -327,6 +334,7 @@ namespace WinMixerDeck
 
                 case PluginConsts.VOL_INTERVAL:
                     core.getGlobalSettings(core.pluginUUID);
+                    willAppears.Add(e);
                     break;
                 default:
                     break;
@@ -361,6 +369,7 @@ namespace WinMixerDeck
 
                 case PluginConsts.VOL_INTERVAL:
                     action = PluginConsts.VOL_INTERVAL;
+                    core.sendToPI(e.context, action, JObject.FromObject( new { audioIntervals = this.intervals, messageType = "populate" } ));
                     break;
 
                 default:
@@ -435,10 +444,25 @@ namespace WinMixerDeck
             {
 
                 case PluginConsts.VOL_INTERVAL:
-                    core.sendToPI(e.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "incrementInterval" }));
+                    int curIndex = intervals.IndexOf(interval);
+                    interval = (curIndex == intervals.Count - 1) ? intervals[0] : intervals[curIndex + 1];
+                    core.setGlobalSettings(core.pluginUUID, JObject.FromObject(new { curInterval = this.interval }));
+                    core.sendToPI(e.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "handshake" }));
+                    core.setTitle(e.context, "Vol Int:\n" + (int)interval);
                     break;
 
                 case PluginConsts.APP_CHOOSER:
+                    var audioSessions = getAudioSessions();
+
+                    var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)] };
+
+                    core.LogMessage("Setting new app name: " + tmp.appName);
+                    JObject pload = new JObject();
+                    pload.Add(e.context, JObject.FromObject(tmp));
+
+                    core.setSettings(e.context, pload);
+                    core.setTitle(e.context, tmp.appName);
+                    core.getSettings(e.context);
                     break;
 
                 case PluginConsts.VOL_CONTROLLER:
@@ -460,11 +484,11 @@ namespace WinMixerDeck
 
                                     if (keys[e.context].keyFunction == "volUp")
                                     {
-                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) + interval);
+                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) + interval / 100);
                                     }
                                     else
                                     {
-                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval);
+                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval / 100);
                                     }
                                 }
                                 catch

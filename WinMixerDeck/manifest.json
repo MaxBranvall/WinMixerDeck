@@ -56,7 +56,7 @@
   "Name": "WinMixerDeck",
   "Icon": "assets/soundMixer",
   "URL": "https://github.com/MaxBranvall/WinMixerDeck",
-  "Version": "1.2",
+  "Version": "1.4",
   "OS": [
     {
       "Platform": "windows",

@@ -12,6 +12,10 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\mixer%402x.png" />
     <Content Include="com.mbranvall.winmixerdeck.sdPlugin\assets\mixer.png" />
@@ -31,6 +35,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="assets\black%402x.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\black.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\mixer%402x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -40,7 +50,13 @@
     <None Update="assets\soundMixer%402x.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\soundMixer%402x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\soundMixer.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\soundMixer.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="assets\test%402x.png">

@@ -2,17 +2,17 @@
 var websocket = null;
 var PIuuid = null;
 var actionInfo = {}
-var volInterval = 1;
-let mapIterator = Symbol.iterator;
+// var volInterval = 1;
+// let mapIterator = Symbol.iterator;
 
-const volIntervals = new Map([
-    ['0', 'Mute'],
-    ['1', '1'],
-    ['2', '2'],
-    ['5', '5'],
-    ['10', '10'],
-    ['25', '25'] 
-]);
+// const volIntervals = new Map([
+//     ['0', 'Mute'],
+//     ['1', '1'],
+//     ['2', '2'],
+//     ['5', '5'],
+//     ['10', '10'],
+//     ['25', '25'] 
+// ]);
 
 function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
 
@@ -54,14 +54,21 @@ function processMessage(msg) {
     if (messageType == Constants.SEND_TO_PI) {
         uuid = msg['context'];
 
+
+
+    }
+
+    if (messageType == "populate") {
+        console.log("populate")
+        populateVolumeIntervals(msg['payload']['audioIntervals']);
     }
     
     if (messageType == Constants.HANDSHAKE) {
-        populateVolumeIntervals();
         getGlobalSettings();
     }
     
     else if (event == Constants.DID_RECEIVE_GLOBAL_SETTINGS) {
+        console.log("got global message")
         applyGlobalSettings(msg['payload']);
     }
 
@@ -73,7 +80,7 @@ function setGlobalSettings() {
     ev.event = Constants.SET_GLOBAL_SETTINGS;
     ev.context = PIuuid;
     ev.payload = {
-        "interval": volInterval
+        "curInterval": volInterval
     }
 
     websocket.send(JSON.stringify(ev));
@@ -93,7 +100,7 @@ function getGlobalSettings() {
 function applyGlobalSettings(payload) {
     console.log("applying settings");
 
-    volInterval = payload['settings']['interval'];
+    volInterval = payload['settings']['curInterval'];
 
     document.getElementById("myselect").value = volInterval;
 }
@@ -120,14 +127,14 @@ function setVolInterval() {
     setGlobalSettings();
 }
 
-function populateVolumeIntervals() {
+function populateVolumeIntervals(volIntervals) {
 
-    mapIterator = volIntervals.entries();
+    // mapIterator = volIntervals.entries();
 
-    for (const [k, label] of volIntervals.entries()) {
+    for (const k in volIntervals) {
         let option = document.createElement("option");
-        option.value = k;
-        option.innerHTML = label;
+        option.value = volIntervals[k];
+        option.innerHTML = volIntervals[k];
 
         if (k == '1') {
             option.defaultSelected = true;
