@@ -24,6 +24,7 @@ namespace WinMixerDeck
         Timer myTimer;
         string context;
         KeyDown keyHeldDown;
+        string originalTitle = "";
         int i = 0;
         float interval = 0.25f;
         Dictionary<string, KeyWrapper> keys = new Dictionary<string, KeyWrapper>();
@@ -397,33 +398,35 @@ namespace WinMixerDeck
         {
             myTimer.Stop();
 
-            string context = keyHeldDown.context;
-            core.LogMessage("Held button with context: " + context);
+            core.setTitle(this.context, this.originalTitle);
 
-            if (keyHeldDown.action == "com.mbranvall.winmixerdeck.applicationpicker")
-            {
+            //string context = keyHeldDown.context;
+            //core.LogMessage("Held button with context: " + context);
 
-                var audioSessions = getAudioSessions();
+            //if (keyHeldDown.action == "com.mbranvall.winmixerdeck.applicationpicker")
+            //{
 
-                var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)] };
+            //    var audioSessions = getAudioSessions();
 
-                core.LogMessage("Setting new app name: " + tmp.appName);
-                JObject pload = new JObject();
-                pload.Add(context, JObject.FromObject(tmp));
+            //    var tmp = new { appName = audioSessions[new Random().Next(audioSessions.Count)] };
 
-                core.setSettings(context, pload);
-                core.setTitle(tmp.appName, context);
-                core.getSettings(context);
+            //    core.LogMessage("Setting new app name: " + tmp.appName);
+            //    JObject pload = new JObject();
+            //    pload.Add(context, JObject.FromObject(tmp));
+
+            //    core.setSettings(context, pload);
+            //    core.setTitle(tmp.appName, context);
+            //    core.getSettings(context);
 
 
-            } else if (keyHeldDown.action == PluginConsts.VOL_INTERVAL) {
+            //} else if (keyHeldDown.action == PluginConsts.VOL_INTERVAL) {
 
-                core.sendToPI(keyHeldDown.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "incrementInterval" }));
+            //    core.sendToPI(keyHeldDown.context, PluginConsts.VOL_INTERVAL, JObject.FromObject(new { messageType = "incrementInterval" }));
 
-            } else
-            {
-                return;
-            }
+            //} else
+            //{
+            //    return;
+            //}
 
         }
 
@@ -482,14 +485,54 @@ namespace WinMixerDeck
                                 {
                                     core.LogMessage("adjusting volume");
 
+                                    var currVolume = sessions.getVolumeLevel(session);
+
                                     if (keys[e.context].keyFunction == "volUp")
                                     {
-                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) + interval / 100);
+
+                                        var diff = 1 - currVolume;
+
+                                        if ((interval / 100) > diff)
+                                        {
+                                            sessions.adjustVolume(session, currVolume + diff);
+                                            
+                                        } else
+                                        {
+                                            sessions.adjustVolume(session, currVolume + interval / 100);
+                                        }
+                                        
                                     }
                                     else
                                     {
-                                        sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval / 100);
+
+                                        if ((interval / 100) > currVolume)
+                                        {
+                                            sessions.adjustVolume(session, 0);
+                                        } else
+                                        {
+                                            sessions.adjustVolume(session, sessions.getVolumeLevel(session) - interval / 100);
+                                        }
+                                        
                                     }
+
+                                    // get context of associated app key
+                                    foreach (var y in keys)
+                                    {
+                                        if (y.Value.appName == keys[e.context].appName && y.Value.keyFunction == null)
+                                        {
+
+                                            var z = y;
+                                            double vol = Math.Round(sessions.getVolumeLevel(session), 2);
+
+                                            core.setTitle(y.Key, (vol * 100).ToString());
+                                            this.originalTitle = y.Value.appName;
+                                            this.context = y.Key;
+                                            myTimer.Interval = 3000;
+                                            myTimer.AutoReset = false;
+                                            myTimer.Start();
+                                        }
+                                    }
+
                                 }
                                 catch
                                 {
